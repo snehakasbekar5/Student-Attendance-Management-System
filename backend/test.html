@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Test</title>
+</head>
+
+<body>
+
+    <h1>Student Attendance System</h1>
+
+    <button onclick="addStudent()">Add Student</button>
+
+    <script>
+        function addStudent() {
+
+            fetch("http://localhost:3000/students", {
+                method: "POST",
+
+                headers: {
+                    "Content-Type": "application/json"
+                },
+
+                body: JSON.stringify({
+                    name: "Sneha",
+                    prn: "12345",
+                    className: "B.Tech CSE",
+                    department: "Computer Science"
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert(data.message);
+            })
+            .catch(error => {
+                console.log(error);
+                alert("Error adding student");
+            });
+        }
+    </script>
+
+</body>
+</html>

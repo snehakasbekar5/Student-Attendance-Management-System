@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Dashboard & Student Management</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar">
+        <div class="nav-brand">
+            <h1>Faculty Portal — Student Attendance System</h1>
+            <span id="facultyWelcomeSub">Manage classes, students, live attendance, and academic reports</span>
+        </div>
+        <div class="nav-links">
+            <a href="faculty-dashboard.html" class="nav-link active">Dashboard</a>
+            <a href="#studentManagementSection" class="nav-link">Manage Students</a>
+            <a href="faculty-attendance.html" class="nav-link">Mark Attendance</a>
+            <a href="faculty-report.html" class="nav-link">Reports &amp; History</a>
+            <span class="nav-user-badge" id="navUserBadge">Faculty</span>
+            <button type="button" id="logoutButton" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+
+        <!-- Live Overview Statistics (Calculated from Saved Data) -->
+        <div class="grid-stats" id="dashboardStatsGrid">
+            <div class="stat-card">
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value" id="statTotalStudents">--</div>
+                <div class="stat-sub">Across <span id="statTotalClasses">6</span> classes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Sessions Conducted</div>
+                <div class="stat-value" id="statTotalSessions">--</div>
+                <div class="stat-sub">Finalized class sessions</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Overall Attendance</div>
+                <div class="stat-value" id="statOverallRate">--%</div>
+                <div class="stat-sub" id="statPresentAbsentSub">Present vs Absent records</div>
+            </div>
+            <div class="stat-card stat-red">
+                <div class="stat-label">Low Attendance (&lt;75%)</div>
+                <div class="stat-value" id="statLowAttendance">--</div>
+                <div class="stat-sub">Students needing attention</div>
+            </div>
+        </div>
+
+        <!-- Quick Session Launcher (Preserves existing IDs & workflow) -->
+        <div class="card-panel">
+            <div class="section-header">
+                <div>
+                    <p class="welcome-text" id="welcomeText" style="margin:0;">Welcome, Faculty!</p>
+                    <p style="margin:4px 0 0 0; color:#64748b; font-size:14px;">
+                        Select a class and subject to launch Live Attendance Marking or view Attendance Reports.
+                    </p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="classSelect">Select Class</label>
+                    <select id="classSelect">
+                        <option value="">Select Class</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subjectSelect">Select Subject</label>
+                    <select id="subjectSelect">
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="continueButton" class="btn-success" style="width:100%;">
+                        Mark Attendance
+                    </button>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="reportButton" style="width:100%;">
+                        View Attendance Report
+                    </button>
+                </div>
+            </div>
+
+            <p id="message" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Class-wise Summary Overview -->
+        <div class="card-panel">
+            <div class="section-header">
+                <h2>Class-wise Attendance Overview</h2>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Class Name</th>
+                            <th>Registered Students</th>
+                            <th>Total Present Records</th>
+                            <th>Total Absent Records</th>
+                            <th>Class Attendance %</th>
+                            <th>Quick Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="classBreakdownBody">
+                        <tr>
+                            <td colspan="6">Loading class summary...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ================================================
+             FEATURE TWO: ADD AND MANAGE STUDENTS
+        ================================================= -->
+        <div class="card-panel" id="studentManagementSection">
+            <div class="section-header">
+                <div>
+                    <h2>Student Management</h2>
+                    <p style="margin:4px 0 0 0; color:#64748b; font-size:14px;">
+                        Add, search, filter, edit, or remove students. Changes persist immediately in JSON storage.
+                    </p>
+                </div>
+                <span class="badge badge-good" id="studentCountBadge">Loading students...</span>
+            </div>
+
+            <!-- Add / Edit Student Form -->
+            <div style="background-color:#f8fafc; border:1px solid #e2e8f0; border-radius:8px; padding:20px; margin-bottom:22px;">
+                <h3 id="studentFormTitle" style="margin-top:0; color:#12355b;">Add New Student</h3>
+
+                <form id="studentForm" novalidate style="width:100%; padding:0; box-shadow:none; background:transparent;">
+                    <input type="hidden" id="editingOriginalPrn" value="">
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="studentPrnInput">Student ID / PRN *</label>
+                            <input
+                                type="text"
+                                id="studentPrnInput"
+                                placeholder="e.g., 1264"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentNameInput">Full Name *</label>
+                            <input
+                                type="text"
+                                id="studentNameInput"
+                                placeholder="e.g., Vikram Deshpande"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentRollInput">Roll Number *</label>
+                            <input
+                                type="text"
+                                id="studentRollInput"
+                                placeholder="e.g., DS2-06"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentClassInput">Class *</label>
+                            <select id="studentClassInput" required>
+                                <option value="">Select Class</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentDeptInput">Department</label>
+                            <input
+                                type="text"
+                                id="studentDeptInput"
+                                value="Computer Science"
+                                placeholder="Computer Science"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="studentEmailInput">Email Address</label>
+                            <input
+                                type="email"
+                                id="studentEmailInput"
+                                placeholder="e.g., vikram@college.edu"
+                            >
+                        </div>
+                    </div>
+
+                    <div class="action-bar" style="margin-top:16px; margin-bottom:0;">
+                        <button type="submit" id="saveStudentBtn" class="btn-success">
+                            + Add Student
+                        </button>
+                        <button type="button" id="cancelStudentEditBtn" class="btn-secondary" style="display:none;">
+                            Cancel Edit
+                        </button>
+                        <button type="button" id="resetStudentFormBtn" class="btn-outline">
+                            Clear Form
+                        </button>
+                    </div>
+                </form>
+
+                <div id="studentFormMessage" style="display:none;" role="alert" aria-live="polite"></div>
+            </div>
+
+            <!-- Search & Filter Bar for Student Directory -->
+            <div class="filter-bar">
+                <div class="form-group" style="flex:2 1 260px;">
+                    <label for="studentSearchInput">Search by Name, Student ID (PRN), or Roll Number</label>
+                    <input
+                        type="text"
+                        id="studentSearchInput"
+                        placeholder="Type name, PRN (e.g. 1234), or Roll No (e.g. DS2-01)..."
+                    >
+                </div>
+
+                <div class="form-group" style="flex:1 1 200px;">
+                    <label for="studentFilterClass">Filter by Class</label>
+                    <select id="studentFilterClass">
+                        <option value="ALL">All Classes</option>
+                    </select>
+                </div>
+
+                <div class="form-group" style="flex:0 0 auto;">
+                    <button type="button" id="clearStudentFiltersBtn" class="btn-outline">
+                        Reset Filters
+                    </button>
+                </div>
+            </div>
+
+            <!-- Registered Students Table -->
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student ID (PRN)</th>
+                            <th>Full Name</th>
+                            <th>Class</th>
+                            <th>Department</th>
+                            <th>Attendance Summary</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="studentsTableBody">
+                        <tr>
+                            <td colspan="7">Loading registered students...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" id="deleteConfirmModal" role="dialog" aria-modal="true" aria-labelledby="deleteModalTitle">
+        <div class="modal-box">
+            <h3 id="deleteModalTitle">Confirm Student Deletion</h3>
+            <p id="deleteModalText">
+                Are you sure you want to delete this student? This will permanently remove their student profile and attendance records.
+            </p>
+            <div class="modal-actions">
+                <button type="button" id="cancelDeleteBtn" class="btn-outline">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn-danger">Delete Student</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        // Prevent logged-in students from accessing faculty pages
+        if (localStorage.getItem("userRole") === "student") {
+            window.location.href = "student-dashboard.html";
+        }
+
+        const facultyName = localStorage.getItem("userName") || localStorage.getItem("username") || "Faculty";
+        document.getElementById("welcomeText").textContent = `Welcome, ${facultyName}!`;
+        document.getElementById("navUserBadge").textContent = `Faculty: ${localStorage.getItem("username") || "faculty1"}`;
+
+        let allStudentsCache = [];
+        let pendingDeletePrn = null;
+
+        function getAuthHeaders() {
+            const headers = {
+                "Content-Type": "application/json",
+                "X-User-Role": localStorage.getItem("userRole") || "faculty",
+                "X-Username": localStorage.getItem("username") || "faculty1",
+                "X-Faculty-Id": localStorage.getItem("facultyId") || "faculty1"
+            };
+            const token = localStorage.getItem("authToken");
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        function showStudentMessage(text, isSuccess = false) {
+            const box = document.getElementById("studentFormMessage");
+            box.style.display = "block";
+            box.className = isSuccess ? "alert-box alert-success" : "alert-box alert-error";
+            box.textContent = text;
+        }
+
+        function hideStudentMessage() {
+            const box = document.getElementById("studentFormMessage");
+            box.style.display = "none";
+            box.textContent = "";
+        }
+
+        function calcStudentStats(records) {
+            const valid = (records || []).filter(r => r.status === "present" || r.status === "absent");
+            const present = valid.filter(r => r.status === "present").length;
+            const total = valid.length;
+            const pct = total > 0 ? ((present / total) * 100).toFixed(1) : "0.0";
+            return { present, total, pct: Number(pct) };
+        }
+
+        // Load classes & subjects
+        function loadMetadata() {
+            fetch(`${API_BASE}/classes`)
+                .then(res => res.json())
+                .then(classes => {
+                    const classSelect = document.getElementById("classSelect");
+                    const studentClassInput = document.getElementById("studentClassInput");
+                    const studentFilterClass = document.getElementById("studentFilterClass");
+
+                    const savedClass = localStorage.getItem("selectedClass") || "";
+
+                    classes.forEach(className => {
+                        const opt1 = document.createElement("option");
+                        opt1.value = className;
+                        opt1.textContent = className;
+                        if (className === savedClass) opt1.selected = true;
+                        classSelect.appendChild(opt1);
+
+                        const opt2 = document.createElement("option");
+                        opt2.value = className;
+                        opt2.textContent = className;
+                        studentClassInput.appendChild(opt2);
+
+                        const opt3 = document.createElement("option");
+                        opt3.value = className;
+                        opt3.textContent = className;
+                        studentFilterClass.appendChild(opt3);
+                    });
+                })
+                .catch(err => console.error("Error loading classes:", err));
+
+            fetch(`${API_BASE}/subjects`)
+                .then(res => res.json())
+                .then(subjects => {
+                    const subjectSelect = document.getElementById("subjectSelect");
+                    const savedSubject = localStorage.getItem("selectedSubject") || "";
+
+                    subjects.forEach(subject => {
+                        const option = document.createElement("option");
+                        option.value = subject;
+                        option.textContent = subject;
+                        if (subject === savedSubject) option.selected = true;
+                        subjectSelect.appendChild(option);
+                    });
+                })
+                .catch(err => console.error("Error loading subjects:", err));
+        }
+
+        // Load Faculty Dashboard stats & class breakdown
+        function loadDashboardSummary() {
+            fetch(`${API_BASE}/dashboard/faculty`)
+                .then(res => res.json())
+                .then(data => {
+                    document.getElementById("statTotalStudents").textContent = data.totalStudents;
+                    document.getElementById("statTotalClasses").textContent = data.totalClasses;
+                    document.getElementById("statTotalSessions").textContent = data.totalSessionsConducted;
+                    document.getElementById("statOverallRate").textContent = `${data.overallAttendancePercentage.toFixed(2)}%`;
+                    document.getElementById("statPresentAbsentSub").textContent =
+                        `${data.presentCount} Present / ${data.absentCount} Absent`;
+                    document.getElementById("statLowAttendance").textContent = data.lowAttendanceCount;
+
+                    const tbody = document.getElementById("classBreakdownBody");
+                    tbody.innerHTML = "";
+                    (data.classBreakdown || []).forEach(cls => {
+                        const tr = document.createElement("tr");
+                        const badgeClass = cls.attendancePercentage >= 75 ? "badge-good" : "badge-warning";
+                        tr.innerHTML = `
+                            <td><strong>${cls.className}</strong></td>
+                            <td>${cls.studentCount}</td>
+                            <td class="present">${cls.presentCount}</td>
+                            <td class="absent">${cls.absentCount}</td>
+                            <td><span class="badge ${badgeClass}">${cls.attendancePercentage.toFixed(2)}%</span></td>
+                            <td>
+                                <button type="button" class="btn-sm btn-success" onclick="quickLaunch('${cls.className}', 'attendance')">
+                                    Mark Attendance
+                                </button>
+                                <button type="button" class="btn-sm btn-outline" onclick="quickLaunch('${cls.className}', 'report')">
+                                    View Report
+                                </button>
+                            </td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                })
+                .catch(err => console.error("Error loading dashboard summary:", err));
+        }
+
+        window.quickLaunch = function(className, target) {
+            localStorage.setItem("selectedClass", className);
+            const currentSubj = document.getElementById("subjectSelect").value || localStorage.getItem("selectedSubject") || "DSA";
+            localStorage.setItem("selectedSubject", currentSubj);
+            if (target === "attendance") {
+                window.location.href = "faculty-attendance.html";
+            } else {
+                window.location.href = "faculty-report.html";
+            }
+        };
+
+        // Load all students & render table
+        function loadStudentsList() {
+            fetch(`${API_BASE}/students`)
+                .then(res => res.json())
+                .then(students => {
+                    allStudentsCache = students;
+                    renderStudentsTable();
+                })
+                .catch(err => {
+                    console.error("Error loading students:", err);
+                    document.getElementById("studentsTableBody").innerHTML = `
+                        <tr><td colspan="7" class="absent">Failed to load students from backend.</td></tr>
+                    `;
+                });
+        }
+
+        function renderStudentsTable() {
+            const searchQuery = document.getElementById("studentSearchInput").value.trim().toLowerCase();
+            const classFilter = document.getElementById("studentFilterClass").value;
+            const tbody = document.getElementById("studentsTableBody");
+
+            const filtered = allStudentsCache.filter(student => {
+                if (classFilter !== "ALL" && student.className !== classFilter) {
+                    return false;
+                }
+                if (searchQuery) {
+                    const nameMatch = (student.name || "").toLowerCase().includes(searchQuery);
+                    const prnMatch = (student.prn || "").toLowerCase().includes(searchQuery);
+                    const rollMatch = (student.rollNo || "").toLowerCase().includes(searchQuery);
+                    const emailMatch = (student.email || "").toLowerCase().includes(searchQuery);
+                    return nameMatch || prnMatch || rollMatch || emailMatch;
+                }
+                return true;
+            });
+
+            document.getElementById("studentCountBadge").textContent =
+                `Showing ${filtered.length} of ${allStudentsCache.length} Students`;
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                No students match your current search or class filter.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = "";
+            filtered.forEach(student => {
+                const stats = calcStudentStats(student.attendanceRecords);
+                const badgeClass = stats.total === 0
+                    ? "badge-unmarked"
+                    : (stats.pct >= 75 ? "badge-good" : "badge-warning");
+                const demoTag = student.isDemo ? `<span class="badge badge-demo">DEMO</span>` : "";
+
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>${student.rollNo || "-"}</strong></td>
+                    <td><code>${student.prn}</code></td>
+                    <td>
+                        <strong>${student.name}</strong> ${demoTag}
+                        <div style="font-size:12px; color:#64748b;">${student.email || ""}</div>
+                    </td>
+                    <td>${student.className}</td>
+                    <td>${student.department || "Computer Science"}</td>
+                    <td>
+                        <span class="badge ${badgeClass}">${stats.pct.toFixed(1)}%</span>
+                        <span style="font-size:12px; color:#64748b; margin-left:6px;">
+                            (${stats.present}/${stats.total} sessions)
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                            <button type="button" class="btn-sm btn-outline" onclick="startEditStudent('${student.prn}')">
+                                Edit
+                            </button>
+                            <button type="button" class="btn-sm btn-danger" onclick="promptDeleteStudent('${student.prn}')">
+                                Delete
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Edit Student handler
+        window.startEditStudent = function(prn) {
+            const student = allStudentsCache.find(s => s.prn === prn);
+            if (!student) return;
+
+            hideStudentMessage();
+            document.getElementById("editingOriginalPrn").value = student.prn;
+            document.getElementById("studentPrnInput").value = student.prn;
+            document.getElementById("studentNameInput").value = student.name || "";
+            document.getElementById("studentRollInput").value = student.rollNo || "";
+            document.getElementById("studentClassInput").value = student.className || "";
+            document.getElementById("studentDeptInput").value = student.department || "Computer Science";
+            document.getElementById("studentEmailInput").value = student.email || "";
+
+            document.getElementById("studentFormTitle").textContent =
+                `Edit Student: ${student.name} (PRN: ${student.prn})`;
+            document.getElementById("saveStudentBtn").textContent = "Update Student";
+            document.getElementById("cancelStudentEditBtn").style.display = "inline-flex";
+
+            document.getElementById("studentManagementSection").scrollIntoView({ behavior: "smooth" });
+            document.getElementById("studentNameInput").focus();
+        };
+
+        function resetStudentForm() {
+            document.getElementById("editingOriginalPrn").value = "";
+            document.getElementById("studentForm").reset();
+            document.getElementById("studentDeptInput").value = "Computer Science";
+            document.getElementById("studentFormTitle").textContent = "Add New Student";
+            document.getElementById("saveStudentBtn").textContent = "+ Add Student";
+            document.getElementById("cancelStudentEditBtn").style.display = "none";
+        }
+
+        document.getElementById("cancelStudentEditBtn").addEventListener("click", function() {
+            resetStudentForm();
+            hideStudentMessage();
+        });
+
+        document.getElementById("resetStudentFormBtn").addEventListener("click", function() {
+            resetStudentForm();
+            hideStudentMessage();
+        });
+
+        // Submit Add / Edit Student Form
+        document.getElementById("studentForm").addEventListener("submit", function(e) {
+            e.preventDefault();
+            hideStudentMessage();
+
+            const originalPrn = document.getElementById("editingOriginalPrn").value.trim();
+            const prn = document.getElementById("studentPrnInput").value.trim();
+            const name = document.getElementById("studentNameInput").value.trim();
+            const rollNo = document.getElementById("studentRollInput").value.trim();
+            const className = document.getElementById("studentClassInput").value.trim();
+            const department = document.getElementById("studentDeptInput").value.trim() || "Computer Science";
+            const email = document.getElementById("studentEmailInput").value.trim();
+
+            if (!prn || !name || !rollNo || !className) {
+                showStudentMessage("Please fill in all required fields: Student ID (PRN), Full Name, Roll Number, and Class.", false);
+                return;
+            }
+
+            const isEditing = Boolean(originalPrn);
+            const url = isEditing
+                ? `${API_BASE}/students/${encodeURIComponent(originalPrn)}`
+                : `${API_BASE}/students`;
+            const method = isEditing ? "PUT" : "POST";
+
+            fetch(url, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    prn,
+                    studentId: prn,
+                    name,
+                    rollNo,
+                    className,
+                    department,
+                    email
+                })
+            })
+            .then(async res => {
+                const data = await res.json();
+                return { ok: res.ok, data };
+            })
+            .then(({ ok, data }) => {
+                if (!ok) {
+                    showStudentMessage(data.message || "Error saving student.", false);
+                    return;
+                }
+                showStudentMessage(data.message || (isEditing ? "Student updated!" : "Student added!"), true);
+                resetStudentForm();
+                loadStudentsList();
+                loadDashboardSummary();
+            })
+            .catch(err => {
+                console.error(err);
+                showStudentMessage("Network error while saving student.", false);
+            });
+        });
+
+        // Delete Student Confirmation Dialog
+        window.promptDeleteStudent = function(prn) {
+            const student = allStudentsCache.find(s => s.prn === prn);
+            if (!student) return;
+            pendingDeletePrn = student.prn;
+            document.getElementById("deleteModalText").textContent =
+                `Are you sure you want to delete "${student.name}" (PRN: ${student.prn}, Roll No: ${student.rollNo}, Class: ${student.className})? This action cannot be undone.`;
+            document.getElementById("deleteConfirmModal").classList.add("open");
+        };
+
+        document.getElementById("cancelDeleteBtn").addEventListener("click", function() {
+            pendingDeletePrn = null;
+            document.getElementById("deleteConfirmModal").classList.remove("open");
+        });
+
+        document.getElementById("confirmDeleteBtn").addEventListener("click", function() {
+            if (!pendingDeletePrn) return;
+            const targetPrn = pendingDeletePrn;
+            document.getElementById("deleteConfirmModal").classList.remove("open");
+
+            fetch(`${API_BASE}/students/${encodeURIComponent(targetPrn)}`, {
+                method: "DELETE",
+                headers: getAuthHeaders()
+            })
+            .then(async res => {
+                const data = await res.json();
+                return { ok: res.ok, data };
+            })
+            .then(({ ok, data }) => {
+                pendingDeletePrn = null;
+                if (!ok) {
+                    showStudentMessage(data.message || "Failed to delete student.", false);
+                    return;
+                }
+                showStudentMessage(data.message || "Student deleted successfully.", true);
+                if (document.getElementById("editingOriginalPrn").value === targetPrn) {
+                    resetStudentForm();
+                }
+                loadStudentsList();
+                loadDashboardSummary();
+            })
+            .catch(err => {
+                console.error(err);
+                showStudentMessage("Network error while deleting student.", false);
+            });
+        });
+
+        // Search and Filter listeners
+        document.getElementById("studentSearchInput").addEventListener("input", renderStudentsTable);
+        document.getElementById("studentFilterClass").addEventListener("change", renderStudentsTable);
+        document.getElementById("clearStudentFiltersBtn").addEventListener("click", function() {
+            document.getElementById("studentSearchInput").value = "";
+            document.getElementById("studentFilterClass").value = "ALL";
+            renderStudentsTable();
+        });
+
+        // Mark Attendance button (Existing workflow preserved)
+        document.getElementById("continueButton").addEventListener("click", function() {
+            const selectedClass = document.getElementById("classSelect").value;
+            const selectedSubject = document.getElementById("subjectSelect").value;
+
+            if (selectedClass === "" || selectedSubject === "") {
+                document.getElementById("message").textContent = "Please select both class and subject.";
+                return;
+            }
+
+            localStorage.setItem("selectedClass", selectedClass);
+            localStorage.setItem("selectedSubject", selectedSubject);
+            window.location.href = "faculty-attendance.html";
+        });
+
+        // View Report button (Existing workflow preserved)
+        document.getElementById("reportButton").addEventListener("click", function() {
+            const selectedClass = document.getElementById("classSelect").value;
+            const selectedSubject = document.getElementById("subjectSelect").value;
+
+            if (selectedClass === "" || selectedSubject === "") {
+                document.getElementById("message").textContent = "Please select both class and subject.";
+                return;
+            }
+
+            localStorage.setItem("selectedClass", selectedClass);
+            localStorage.setItem("selectedSubject", selectedSubject);
+            window.location.href = "faculty-report.html";
+        });
+
+        // Logout button
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("username");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("facultyId");
+            window.location.href = "index.html";
+        });
+
+        // Initialize page
+        loadMetadata();
+        loadDashboardSummary();
+        loadStudentsList();
+    </script>
+
+</body>
+
+</html>

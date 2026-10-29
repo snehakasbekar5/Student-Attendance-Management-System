@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance Management System — Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <h1>Student Attendance Management System</h1>
+
+        <div class="login-card">
+
+            <h2>Portal Login</h2>
+
+            <p>Enter your Faculty or Student credentials to continue</p>
+
+            <form id="loginForm">
+
+                <label for="username">Username or Student ID (PRN)</label>
+
+                <input
+                    type="text"
+                    id="username"
+                    placeholder="e.g., faculty1 or student1 or 1001"
+                    autocomplete="username"
+                    required
+                >
+
+                <br><br>
+
+                <label for="password">Password</label>
+
+                <input
+                    type="password"
+                    id="password"
+                    placeholder="Enter password"
+                    autocomplete="current-password"
+                    required
+                >
+
+                <br><br>
+
+                <button type="submit" id="loginButton">
+                    Login
+                </button>
+
+            </form>
+
+            <p id="message" role="alert" aria-live="polite"></p>
+
+            <div class="demo-credentials-box">
+                <strong>Demo Credentials (Click to Fill):</strong>
+                <div>• Faculty: <code>faculty1</code> / <code>faculty123</code></div>
+                <div>• <strong>Sneha: <code>sneha</code> / <code>sneha123</code> (or PRN <code>1001</code>)</strong></div>
+                <div>• Student 2 (Riddhi, 1002): <code>student2</code> / <code>student123</code></div>
+                <div>• Student 3 (Siddhi, 1003 • Low % Demo): <code>student3</code> / <code>student123</code></div>
+                <div class="demo-cred-btns">
+                    <button type="button" class="btn-outline btn-sm" onclick="fillDemoLogin('faculty1', 'faculty123')">
+                        Fill Faculty
+                    </button>
+                    <button type="button" class="btn-outline btn-sm" onclick="fillDemoLogin('sneha', 'sneha123')">
+                        Fill Sneha (sneha / sneha123)
+                    </button>
+                    <button type="button" class="btn-outline btn-sm" onclick="fillDemoLogin('student3', 'student123')">
+                        Fill Siddhi (1003)
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

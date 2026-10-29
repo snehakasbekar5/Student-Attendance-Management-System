@@ -1,0 +1,17 @@
+{
+  "rosterVersion": "10_students_v1",
+  "updatedAt": "2026-10-13T07:13:00.000Z",
+  "studentCount": 10,
+  "students": [
+    "Sneha (1001) - CSE-(I)SE DS",
+    "Riddhi (1002) - CSE-(I)SE DS",
+    "Siddhi (1003) - CSE-(I)SE R&AI",
+    "Shravni (1004) - CSE-(I)SE R&AI",
+    "Umme Hanni (1005) - CSE-(R)SE",
+    "Vaishnavi (1006) - CSE-(R)SE",
+    "Anuja (1007) - CSE-(I)TE DS",
+    "Rohan (1008) - CSE-(I)TE DS",
+    "Mohit (1009) - CSE-(I)TE R&AI",
+    "Parth (1010) - CSE-(R)TE"
+  ]
+}

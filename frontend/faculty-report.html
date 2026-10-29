@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Faculty Attendance Report &amp; History</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar no-print">
+        <div class="nav-brand">
+            <h1>Attendance Reports &amp; History</h1>
+            <span>Comprehensive analytics, low-attendance alerts, and session history</span>
+        </div>
+        <div class="nav-links">
+            <a href="faculty-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="faculty-dashboard.html#studentManagementSection" class="nav-link">Manage Students</a>
+            <a href="faculty-attendance.html" class="nav-link">Mark Attendance</a>
+            <a href="faculty-report.html" class="nav-link active">Reports &amp; History</a>
+            <span class="nav-user-badge" id="navUserBadge">Faculty</span>
+            <button type="button" id="logoutButton" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <div class="report-container">
+
+        <!-- Report Header (Print-friendly) -->
+        <div class="section-header">
+            <div>
+                <h2 style="margin:0;">Academic Attendance Report</h2>
+                <p id="selectedClass" style="margin:4px 0 0 0; font-size:14px; color:#12355b;"></p>
+                <p id="selectedSubject" style="margin:2px 0 0 0; font-size:14px; color:#12355b;"></p>
+                <p id="reportDateRangeLabel" style="margin:2px 0 0 0; font-size:13px; color:#64748b;"></p>
+            </div>
+            <div class="no-print" style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" id="printReportBtn" class="btn-outline">
+                    🖨️ Print Report
+                </button>
+                <button type="button" id="attendanceButton" class="btn-success">
+                    Mark Attendance
+                </button>
+                <button type="button" id="dashboardButton" class="btn-secondary">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar no-print">
+            <div class="form-group">
+                <label for="filterClass">Class</label>
+                <select id="filterClass">
+                    <option value="ALL">All Classes</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="filterSubject">Subject</label>
+                <select id="filterSubject">
+                    <option value="ALL">All Subjects</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="filterStartDate">From Date</label>
+                <input type="date" id="filterStartDate">
+            </div>
+
+            <div class="form-group">
+                <label for="filterEndDate">To Date</label>
+                <input type="date" id="filterEndDate">
+            </div>
+
+            <div class="form-group" style="max-width:130px;">
+                <label for="filterThreshold">Low % Threshold</label>
+                <input type="number" id="filterThreshold" min="1" max="100" value="75">
+            </div>
+
+            <div class="form-group">
+                <label for="filterSearch">Search Student</label>
+                <input type="text" id="filterSearch" placeholder="Name, PRN, or Roll No...">
+            </div>
+
+            <div class="form-group" style="flex:0 0 auto;">
+                <button type="button" id="applyFiltersBtn">Apply Filters</button>
+                <button type="button" id="resetFiltersBtn" class="btn-outline">Reset</button>
+            </div>
+        </div>
+
+        <!-- Summary Cards (Calculated from Saved Records) -->
+        <div class="grid-stats">
+            <div class="stat-card">
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value" id="repTotalStudents">0</div>
+                <div class="stat-sub" id="repDistinctSessionsSub">0 finalized sessions</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Present Count</div>
+                <div class="stat-value" id="repPresentCount">0</div>
+                <div class="stat-sub">Finalized Present records</div>
+            </div>
+            <div class="stat-card stat-red">
+                <div class="stat-label">Absent Count</div>
+                <div class="stat-value" id="repAbsentCount">0</div>
+                <div class="stat-sub">Finalized Absent records</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Attendance Percentage</div>
+                <div class="stat-value" id="repAttendancePct">0.00%</div>
+                <div class="stat-sub">Present / Finalized × 100</div>
+            </div>
+        </div>
+
+        <!-- Calculation Policy Box -->
+        <div class="alert-box alert-info" style="font-size:13px;">
+            <strong>Calculation Policy:</strong>
+            Attendance Percentage = <code>(Present Sessions ÷ Total Finalized Attendance Sessions) × 100</code>.
+            Unmarked or draft sessions are excluded from finalized attendance totals. Only saved finalized records (<code>present</code> / <code>absent</code>) are counted.
+        </div>
+
+        <!-- 1. Individual Student Attendance Percentages Table -->
+        <h2>1. Individual Student Attendance Summary</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>PRN / Student ID</th>
+                        <th>Class</th>
+                        <th>Total Sessions</th>
+                        <th>Present</th>
+                        <th>Absent</th>
+                        <th>Attendance %</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="reportTable">
+                    <tr>
+                        <td colspan="9">Loading student summary...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr>
+
+        <!-- 2. Students with Low Attendance (< Threshold) -->
+        <h2 id="lowAttendanceHeading">2. Students with Low Attendance (&lt; 75%)</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Roll No</th>
+                        <th>Student Name</th>
+                        <th>PRN / Student ID</th>
+                        <th>Class</th>
+                        <th>Present / Total</th>
+                        <th>Absent</th>
+                        <th>Current %</th>
+                        <th>Deficit to Threshold</th>
+                    </tr>
+                </thead>
+                <tbody id="lowAttendanceTable">
+                    <tr>
+                        <td colspan="8">Checking low attendance records...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <hr>
+
+        <!-- 3. Detailed Table of Saved Attendance Records -->
+        <div class="section-header">
+            <h2 style="margin:0;">3. Detailed Saved Attendance History</h2>
+            <span class="badge badge-good" id="historyCountBadge">0 records</span>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Class</th>
+                        <th>Subject</th>
+                        <th>Roll No</th>
+                        <th>PRN / Student ID</th>
+                        <th>Student Name</th>
+                        <th>Status</th>
+                        <th>Marked By</th>
+                        <th class="no-print">Session Action</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTable">
+                    <tr>
+                        <td colspan="9">Loading attendance history...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p id="message" role="alert" aria-live="polite"></p>
+
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        // Prevent logged-in students from accessing faculty report page
+        if (localStorage.getItem("userRole") === "student") {
+            window.location.href = "student-dashboard.html";
+        }
+
+        document.getElementById("navUserBadge").textContent =
+            `Faculty: ${localStorage.getItem("username") || "faculty1"}`;
+
+        let latestReportData = null;
+
+        async function initReportFilters() {
+            const [classesRes, subjectsRes] = await Promise.all([
+                fetch(`${API_BASE}/classes`).then(r => r.json()),
+                fetch(`${API_BASE}/subjects`).then(r => r.json())
+            ]);
+
+            const filterClass = document.getElementById("filterClass");
+            const savedClass = localStorage.getItem("selectedClass") || "ALL";
+            classesRes.forEach(cls => {
+                const opt = document.createElement("option");
+                opt.value = cls;
+                opt.textContent = cls;
+                if (cls === savedClass) opt.selected = true;
+                filterClass.appendChild(opt);
+            });
+
+            const filterSubject = document.getElementById("filterSubject");
+            const savedSubject = localStorage.getItem("selectedSubject") || "ALL";
+            subjectsRes.forEach(subj => {
+                const opt = document.createElement("option");
+                opt.value = subj;
+                opt.textContent = subj;
+                if (subj === savedSubject) opt.selected = true;
+                filterSubject.appendChild(opt);
+            });
+
+            loadReportData();
+        }
+
+        function updateReportHeaderLabels() {
+            const cls = document.getElementById("filterClass").value;
+            const subj = document.getElementById("filterSubject").value;
+            const start = document.getElementById("filterStartDate").value;
+            const end = document.getElementById("filterEndDate").value;
+            const threshold = Number(document.getElementById("filterThreshold").value) || 75;
+
+            document.getElementById("selectedClass").textContent =
+                "Class: " + (cls === "ALL" ? "All Classes" : cls);
+            document.getElementById("selectedSubject").textContent =
+                "Subject: " + (subj === "ALL" ? "All Subjects" : subj);
+
+            let dateText = "Date Range: All Recorded Dates";
+            if (start && end) dateText = `Date Range: ${start} to ${end}`;
+            else if (start) dateText = `Date Range: From ${start}`;
+            else if (end) dateText = `Date Range: Up to ${end}`;
+            document.getElementById("reportDateRangeLabel").textContent = dateText;
+
+            document.getElementById("lowAttendanceHeading").textContent =
+                `2. Students with Low Attendance (< ${threshold}%)`;
+
+            if (cls && cls !== "ALL") localStorage.setItem("selectedClass", cls);
+            if (subj && subj !== "ALL") localStorage.setItem("selectedSubject", subj);
+        }
+
+        function loadReportData() {
+            updateReportHeaderLabels();
+
+            const className = document.getElementById("filterClass").value;
+            const subject = document.getElementById("filterSubject").value;
+            const startDate = document.getElementById("filterStartDate").value;
+            const endDate = document.getElementById("filterEndDate").value;
+            const threshold = Number(document.getElementById("filterThreshold").value) || 75;
+
+            const params = new URLSearchParams({
+                className,
+                subject,
+                startDate,
+                endDate,
+                threshold: String(threshold)
+            });
+
+            fetch(`${API_BASE}/reports?${params.toString()}`)
+                .then(res => res.json())
+                .then(data => {
+                    latestReportData = data;
+                    renderReportViews();
+                })
+                .catch(err => {
+                    console.error(err);
+                    document.getElementById("message").textContent = "Error loading attendance report.";
+                });
+        }
+
+        function renderReportViews() {
+            if (!latestReportData) return;
+
+            const searchQ = document.getElementById("filterSearch").value.trim().toLowerCase();
+            const threshold = Number(document.getElementById("filterThreshold").value) || 75;
+
+            // Filter studentSummaries by search query if typed
+            const matchedStudents = (latestReportData.studentSummaries || []).filter(s => {
+                if (!searchQ) return true;
+                return (
+                    (s.name || "").toLowerCase().includes(searchQ) ||
+                    (s.prn || "").toLowerCase().includes(searchQ) ||
+                    (s.rollNo || "").toLowerCase().includes(searchQ)
+                );
+            });
+
+            // Recalculate summary metrics for matched students
+            let totalPresent = 0;
+            let totalAbsent = 0;
+            matchedStudents.forEach(s => {
+                totalPresent += s.presentCount;
+                totalAbsent += s.absentCount;
+            });
+            const totalFinalized = totalPresent + totalAbsent;
+            const overallPct = totalFinalized > 0 ? ((totalPresent / totalFinalized) * 100).toFixed(2) : "0.00";
+
+            document.getElementById("repTotalStudents").textContent = matchedStudents.length;
+            document.getElementById("repDistinctSessionsSub").textContent =
+                `${latestReportData.summary.totalDistinctSessions} distinct sessions in filter`;
+            document.getElementById("repPresentCount").textContent = totalPresent;
+            document.getElementById("repAbsentCount").textContent = totalAbsent;
+            document.getElementById("repAttendancePct").textContent = `${overallPct}%`;
+
+            // 1. Render Student Summary Table
+            const reportTable = document.getElementById("reportTable");
+            reportTable.innerHTML = "";
+
+            if (matchedStudents.length === 0) {
+                reportTable.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">No students match the selected class or search query.</div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                matchedStudents.forEach(s => {
+                    const isLow = s.totalSessions > 0 && s.percentage < threshold;
+                    const tr = document.createElement("tr");
+                    if (isLow) tr.className = "row-low-attendance";
+
+                    let statusBadge = `<span class="badge badge-unmarked">No Sessions</span>`;
+                    if (s.totalSessions > 0) {
+                        statusBadge = isLow
+                            ? `<span class="badge badge-warning">Low (&lt;${threshold}%)</span>`
+                            : `<span class="badge badge-good">Good Standing</span>`;
+                    }
+
+                    tr.innerHTML = `
+                        <td><strong>${s.rollNo || "-"}</strong></td>
+                        <td><strong>${s.name}</strong></td>
+                        <td><code>${s.prn}</code></td>
+                        <td>${s.className}</td>
+                        <td>${s.totalSessions}</td>
+                        <td class="present">${s.presentCount}</td>
+                        <td class="absent">${s.absentCount}</td>
+                        <td>
+                            <strong>${s.percentage.toFixed(2)}%</strong>
+                            <div class="progress-track">
+                                <div class="progress-fill ${isLow ? "low" : ""}" style="width:${Math.min(100, s.percentage)}%;"></div>
+                            </div>
+                        </td>
+                        <td>${statusBadge}</td>
+                    `;
+                    reportTable.appendChild(tr);
+                });
+            }
+
+            // 2. Render Low Attendance Students Table
+            const lowTable = document.getElementById("lowAttendanceTable");
+            lowTable.innerHTML = "";
+            const lowList = matchedStudents
+                .filter(s => s.totalSessions > 0 && s.percentage < threshold)
+                .sort((a, b) => a.percentage - b.percentage);
+
+            if (lowList.length === 0) {
+                lowTable.innerHTML = `
+                    <tr>
+                        <td colspan="8">
+                            <div class="empty-state">
+                                ✅ No students have attendance below ${threshold}% for the current filter criteria.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                lowList.forEach(s => {
+                    const deficit = (threshold - s.percentage).toFixed(2);
+                    const tr = document.createElement("tr");
+                    tr.className = "row-low-attendance";
+                    tr.innerHTML = `
+                        <td><strong>${s.rollNo || "-"}</strong></td>
+                        <td><strong>${s.name}</strong></td>
+                        <td><code>${s.prn}</code></td>
+                        <td>${s.className}</td>
+                        <td>${s.presentCount} / ${s.totalSessions}</td>
+                        <td class="absent">${s.absentCount}</td>
+                        <td><span class="badge badge-warning">${s.percentage.toFixed(2)}%</span></td>
+                        <td class="absent">-${deficit}% below target</td>
+                    `;
+                    lowTable.appendChild(tr);
+                });
+            }
+
+            // 3. Render Detailed History Table
+            const historyTable = document.getElementById("historyTable");
+            historyTable.innerHTML = "";
+            const historyRows = (latestReportData.historyRecords || []).filter(r => {
+                if (!searchQ) return true;
+                return (
+                    (r.studentName || "").toLowerCase().includes(searchQ) ||
+                    (r.prn || "").toLowerCase().includes(searchQ) ||
+                    (r.rollNo || "").toLowerCase().includes(searchQ)
+                );
+            });
+
+            document.getElementById("historyCountBadge").textContent =
+                `${historyRows.length} Saved Record(s)`;
+
+            if (historyRows.length === 0) {
+                historyTable.innerHTML = `
+                    <tr>
+                        <td colspan="9">
+                            <div class="empty-state">
+                                No saved attendance records match the selected class, subject, and date range.
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            } else {
+                historyRows.forEach(rec => {
+                    const tr = document.createElement("tr");
+                    const isPres = rec.status === "present";
+                    tr.innerHTML = `
+                        <td><strong>${rec.date}</strong></td>
+                        <td>${rec.className}</td>
+                        <td>${rec.subject}</td>
+                        <td>${rec.rollNo || "-"}</td>
+                        <td><code>${rec.prn}</code></td>
+                        <td>${rec.studentName}</td>
+                        <td class="${isPres ? "present" : "absent"}">
+                            <span class="badge ${isPres ? "badge-present" : "badge-absent"}">
+                                ${isPres ? "Present" : "Absent"}
+                            </span>
+                        </td>
+                        <td><code>${rec.facultyId || "faculty1"}</code></td>
+                        <td class="no-print">
+                            <button
+                                type="button"
+                                class="btn-sm btn-outline"
+                                onclick="openSessionInAttendance('${rec.className}', '${rec.subject}', '${rec.date}')"
+                            >
+                                Review / Edit Session
+                            </button>
+                        </td>
+                    `;
+                    historyTable.appendChild(tr);
+                });
+            }
+        }
+
+        window.openSessionInAttendance = function(className, subject, date) {
+            localStorage.setItem("selectedClass", className);
+            localStorage.setItem("selectedSubject", subject);
+            localStorage.setItem("selectedAttendanceDate", date);
+            window.location.href = "faculty-attendance.html";
+        };
+
+        // Event Listeners
+        document.getElementById("applyFiltersBtn").addEventListener("click", loadReportData);
+        document.getElementById("filterClass").addEventListener("change", loadReportData);
+        document.getElementById("filterSubject").addEventListener("change", loadReportData);
+        document.getElementById("filterStartDate").addEventListener("change", loadReportData);
+        document.getElementById("filterEndDate").addEventListener("change", loadReportData);
+        document.getElementById("filterThreshold").addEventListener("change", loadReportData);
+        document.getElementById("filterSearch").addEventListener("input", renderReportViews);
+
+        document.getElementById("resetFiltersBtn").addEventListener("click", function() {
+            document.getElementById("filterClass").value = "ALL";
+            document.getElementById("filterSubject").value = "ALL";
+            document.getElementById("filterStartDate").value = "";
+            document.getElementById("filterEndDate").value = "";
+            document.getElementById("filterThreshold").value = "75";
+            document.getElementById("filterSearch").value = "";
+            loadReportData();
+        });
+
+        document.getElementById("printReportBtn").addEventListener("click", function() {
+            window.print();
+        });
+
+        document.getElementById("dashboardButton").addEventListener("click", function() {
+            window.location.href = "faculty-dashboard.html";
+        });
+
+        document.getElementById("attendanceButton").addEventListener("click", function() {
+            window.location.href = "faculty-attendance.html";
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("username");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("facultyId");
+            window.location.href = "index.html";
+        });
+
+        initReportFilters();
+    </script>
+
+</body>
+
+</html>

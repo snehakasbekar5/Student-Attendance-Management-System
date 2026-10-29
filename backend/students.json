@@ -1,0 +1,762 @@
+[
+  {
+    "name": "Sneha",
+    "prn": "1001",
+    "studentId": "1001",
+    "rollNo": "DS2-01",
+    "className": "CSE-(I)SE DS",
+    "department": "Computer Science",
+    "email": "sneha.1001@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-05",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-06",
+        "className": "CSE-(I)SE DS",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-07",
+        "className": "CSE-(I)SE DS",
+        "subject": "C",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-08",
+        "className": "CSE-(I)SE DS",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-09",
+        "className": "CSE-(I)SE DS",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE DS",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "updatedAt": "2026-10-13T07:30:31.536Z"
+      },
+      {
+        "studentId": "1001",
+        "prn": "1001",
+        "date": "2026-10-17",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "updatedAt": "2026-10-17T06:47:13.146Z"
+      }
+    ]
+  },
+  {
+    "name": "Riddhi",
+    "prn": "1002",
+    "studentId": "1002",
+    "rollNo": "DS2-02",
+    "className": "CSE-(I)SE DS",
+    "department": "Computer Science",
+    "email": "riddhi.1002@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-05",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-06",
+        "className": "CSE-(I)SE DS",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-07",
+        "className": "CSE-(I)SE DS",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-08",
+        "className": "CSE-(I)SE DS",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-09",
+        "className": "CSE-(I)SE DS",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE DS",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "updatedAt": "2026-10-13T07:30:31.536Z"
+      },
+      {
+        "studentId": "1002",
+        "prn": "1002",
+        "date": "2026-10-17",
+        "className": "CSE-(I)SE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "updatedAt": "2026-10-17T06:47:13.146Z"
+      }
+    ]
+  },
+  {
+    "name": "Siddhi",
+    "prn": "1003",
+    "studentId": "1003",
+    "rollNo": "RAI2-01",
+    "className": "CSE-(I)SE R&AI",
+    "department": "Computer Science",
+    "email": "siddhi.1003@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-05",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Maths",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-06",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-07",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-08",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Python",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-09",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1003",
+        "prn": "1003",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Shravni",
+    "prn": "1004",
+    "studentId": "1004",
+    "rollNo": "RAI2-02",
+    "className": "CSE-(I)SE R&AI",
+    "department": "Computer Science",
+    "email": "shravni.1004@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-05",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-06",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-07",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-08",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-09",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "Java",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1004",
+        "prn": "1004",
+        "date": "2026-10-12",
+        "className": "CSE-(I)SE R&AI",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Umme Hanni",
+    "prn": "1005",
+    "studentId": "1005",
+    "rollNo": "RSE-01",
+    "className": "CSE-(R)SE",
+    "department": "Computer Science",
+    "email": "umme.hanni.1005@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-05",
+        "className": "CSE-(R)SE",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-06",
+        "className": "CSE-(R)SE",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-07",
+        "className": "CSE-(R)SE",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-08",
+        "className": "CSE-(R)SE",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-09",
+        "className": "CSE-(R)SE",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1005",
+        "prn": "1005",
+        "date": "2026-10-12",
+        "className": "CSE-(R)SE",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Vaishnavi",
+    "prn": "1006",
+    "studentId": "1006",
+    "rollNo": "RSE-02",
+    "className": "CSE-(R)SE",
+    "department": "Computer Science",
+    "email": "vaishnavi.1006@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-05",
+        "className": "CSE-(R)SE",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-06",
+        "className": "CSE-(R)SE",
+        "subject": "DSA",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-07",
+        "className": "CSE-(R)SE",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-08",
+        "className": "CSE-(R)SE",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-09",
+        "className": "CSE-(R)SE",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1006",
+        "prn": "1006",
+        "date": "2026-10-12",
+        "className": "CSE-(R)SE",
+        "subject": "C++",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Anuja",
+    "prn": "1007",
+    "studentId": "1007",
+    "rollNo": "DS3-01",
+    "className": "CSE-(I)TE DS",
+    "department": "Computer Science",
+    "email": "anuja.1007@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-05",
+        "className": "CSE-(I)TE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-06",
+        "className": "CSE-(I)TE DS",
+        "subject": "DSA",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-07",
+        "className": "CSE-(I)TE DS",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-08",
+        "className": "CSE-(I)TE DS",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-09",
+        "className": "CSE-(I)TE DS",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1007",
+        "prn": "1007",
+        "date": "2026-10-12",
+        "className": "CSE-(I)TE DS",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Rohan",
+    "prn": "1008",
+    "studentId": "1008",
+    "rollNo": "DS3-02",
+    "className": "CSE-(I)TE DS",
+    "department": "Computer Science",
+    "email": "rohan.1008@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-05",
+        "className": "CSE-(I)TE DS",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-06",
+        "className": "CSE-(I)TE DS",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-07",
+        "className": "CSE-(I)TE DS",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-08",
+        "className": "CSE-(I)TE DS",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-09",
+        "className": "CSE-(I)TE DS",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1008",
+        "prn": "1008",
+        "date": "2026-10-12",
+        "className": "CSE-(I)TE DS",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Mohit",
+    "prn": "1009",
+    "studentId": "1009",
+    "rollNo": "RAI3-01",
+    "className": "CSE-(I)TE R&AI",
+    "department": "Computer Science",
+    "email": "mohit.1009@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-05",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-06",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-07",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "C",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-08",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "Python",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-09",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "Java",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1009",
+        "prn": "1009",
+        "date": "2026-10-12",
+        "className": "CSE-(I)TE R&AI",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  },
+  {
+    "name": "Parth",
+    "prn": "1010",
+    "studentId": "1010",
+    "rollNo": "RTE-01",
+    "className": "CSE-(R)TE",
+    "department": "Computer Science",
+    "email": "parth.1010@college.edu",
+    "isDemo": true,
+    "attendanceRecords": [
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-05",
+        "className": "CSE-(R)TE",
+        "subject": "Maths",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-06",
+        "className": "CSE-(R)TE",
+        "subject": "DSA",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-07",
+        "className": "CSE-(R)TE",
+        "subject": "C",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-08",
+        "className": "CSE-(R)TE",
+        "subject": "Python",
+        "status": "absent",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-09",
+        "className": "CSE-(R)TE",
+        "subject": "Java",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      },
+      {
+        "studentId": "1010",
+        "prn": "1010",
+        "date": "2026-10-12",
+        "className": "CSE-(R)TE",
+        "subject": "C++",
+        "status": "present",
+        "facultyId": "faculty1",
+        "isDemo": true
+      }
+    ]
+  }
+]

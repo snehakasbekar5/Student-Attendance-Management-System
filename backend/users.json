@@ -1,0 +1,105 @@
+[
+  {
+    "username": "faculty1",
+    "password": "faculty123",
+    "role": "faculty",
+    "facultyId": "faculty1",
+    "name": "Prof. Rajesh Kulkarni"
+  },
+  {
+    "username": "faculty2",
+    "password": "faculty123",
+    "role": "faculty",
+    "facultyId": "faculty2",
+    "name": "Prof. Meenakshi Iyer",
+    "isDemo": true
+  },
+  {
+    "username": "sneha",
+    "password": "sneha123",
+    "role": "student",
+    "prn": "1001",
+    "name": "Sneha",
+    "isDemo": true
+  },
+  {
+    "username": "student1",
+    "password": "student123",
+    "role": "student",
+    "prn": "1001",
+    "name": "Sneha",
+    "isDemo": true
+  },
+  {
+    "username": "student2",
+    "password": "student123",
+    "role": "student",
+    "prn": "1002",
+    "name": "Riddhi",
+    "isDemo": true
+  },
+  {
+    "username": "student3",
+    "password": "student123",
+    "role": "student",
+    "prn": "1003",
+    "name": "Siddhi",
+    "isDemo": true
+  },
+  {
+    "username": "student4",
+    "password": "student123",
+    "role": "student",
+    "prn": "1004",
+    "name": "Shravni",
+    "isDemo": true
+  },
+  {
+    "username": "student5",
+    "password": "student123",
+    "role": "student",
+    "prn": "1005",
+    "name": "Umme Hanni",
+    "isDemo": true
+  },
+  {
+    "username": "student6",
+    "password": "student123",
+    "role": "student",
+    "prn": "1006",
+    "name": "Vaishnavi",
+    "isDemo": true
+  },
+  {
+    "username": "student7",
+    "password": "student123",
+    "role": "student",
+    "prn": "1007",
+    "name": "Anuja",
+    "isDemo": true
+  },
+  {
+    "username": "student8",
+    "password": "student123",
+    "role": "student",
+    "prn": "1008",
+    "name": "Rohan",
+    "isDemo": true
+  },
+  {
+    "username": "student9",
+    "password": "student123",
+    "role": "student",
+    "prn": "1009",
+    "name": "Mohit",
+    "isDemo": true
+  },
+  {
+    "username": "student10",
+    "password": "student123",
+    "role": "student",
+    "prn": "1010",
+    "name": "Parth",
+    "isDemo": true
+  }
+]

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard — My Attendance Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar no-print">
+        <div class="nav-brand">
+            <h1>Student Attendance Portal</h1>
+            <span id="studentHeaderSub">Personal attendance summary, subject breakdown, and history</span>
+        </div>
+        <div class="nav-links">
+            <a href="student-dashboard.html" class="nav-link active">My Dashboard</a>
+            <a href="student-attendance.html" class="nav-link">Subject-Wise View</a>
+            <span class="nav-user-badge" id="navStudentBadge">Student</span>
+            <button type="button" id="logoutButton" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+
+        <!-- Low-Attendance Warning Banner -->
+        <div id="lowAttendanceWarningBox" class="alert-box" style="display:none;" role="alert" aria-live="polite"></div>
+
+        <!-- Student Profile & Configurable Threshold Card -->
+        <div class="card-panel">
+            <div class="section-header">
+                <div>
+                    <p class="welcome-text" id="welcomeStudentText" style="margin:0; font-size:22px;">Welcome, Student!</p>
+                    <p style="margin:4px 0 0 0; color:#64748b; font-size:14px;">
+                        Read-only verified student attendance records.
+                    </p>
+                </div>
+
+                <div class="no-print" style="display:flex; align-items:center; gap:10px; background:#f8fafc; padding:10px 14px; border-radius:8px; border:1px solid #e2e8f0; flex-wrap:wrap;">
+                    <label for="thresholdInput" style="margin:0; font-size:13px;">Warning Threshold (%):</label>
+                    <input
+                        type="number"
+                        id="thresholdInput"
+                        min="1"
+                        max="100"
+                        value="75"
+                        style="width:75px; padding:6px 8px;"
+                    >
+                    <button type="button" id="printDashboardBtn" class="btn-outline btn-sm">
+                        🖨️ Print Summary
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid-stats" style="margin-bottom:0; margin-top:14px;">
+                <div class="stat-card">
+                    <div class="stat-label">Full Name</div>
+                    <div class="stat-value" id="profileName" style="font-size:20px;">--</div>
+                    <div class="stat-sub" id="profileEmail">--</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Student ID (PRN)</div>
+                    <div class="stat-value" id="profilePrn" style="font-size:20px;">--</div>
+                    <div class="stat-sub">University PRN</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Roll Number</div>
+                    <div class="stat-value" id="profileRollNo" style="font-size:20px;">--</div>
+                    <div class="stat-sub">Class Roll Number</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Registered Class</div>
+                    <div class="stat-value" id="profileClass" style="font-size:18px;">--</div>
+                    <div class="stat-sub" id="profileDept">Computer Science</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Overall Attendance Metrics Cards -->
+        <div class="grid-stats">
+            <div class="stat-card" id="overallRateCard">
+                <div class="stat-label">Overall Attendance %</div>
+                <div class="stat-value" id="overallPctValue">0.00%</div>
+                <div class="stat-sub" id="overallStatusSub">Target: 75.00%</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total Finalized Classes</div>
+                <div class="stat-value" id="overallTotalSessions">0</div>
+                <div class="stat-sub">Conducted across all subjects</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Total Classes Attended</div>
+                <div class="stat-value" id="overallPresentCount">0</div>
+                <div class="stat-sub">Marked Present</div>
+            </div>
+            <div class="stat-card stat-red">
+                <div class="stat-label">Total Classes Missed</div>
+                <div class="stat-value" id="overallAbsentCount">0</div>
+                <div class="stat-sub">Marked Absent</div>
+            </div>
+        </div>
+
+        <!-- Subject-Wise Attendance Breakdown -->
+        <div class="card-panel">
+            <div class="section-header">
+                <div>
+                    <h2>Subject-Wise Attendance</h2>
+                    <p style="margin:4px 0 0 0; color:#64748b; font-size:13px;">
+                        Formula: Attendance % = (Present Sessions ÷ Total Finalized Sessions) × 100
+                    </p>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Total Classes</th>
+                            <th>Classes Attended (Present)</th>
+                            <th>Classes Missed (Absent)</th>
+                            <th>Attendance %</th>
+                            <th>Standing</th>
+                            <th class="no-print">Detailed View</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subjectWiseTableBody">
+                        <tr>
+                            <td colspan="7">Loading subject-wise attendance...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Quick Subject Drill-down (Preserves existing #classSelect, #subjectSelect, #continueButton) -->
+        <div class="card-panel no-print">
+            <h2>Explore Subject Attendance Page</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="classSelect">Your Class</label>
+                    <select id="classSelect"></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="subjectSelect">Select Subject</label>
+                    <select id="subjectSelect">
+                        <option value="">Select Subject</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" id="continueButton">
+                        View Subject Attendance Page
+                    </button>
+                </div>
+            </div>
+            <p id="message" role="alert" aria-live="polite"></p>
+        </div>
+
+        <!-- Recent Attendance History -->
+        <div class="card-panel">
+            <div class="section-header">
+                <h2>Recent Attendance History</h2>
+                <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                    <label for="historySubjectFilter" style="margin:0; font-size:13px;">Filter Subject:</label>
+                    <select id="historySubjectFilter" style="padding:6px 10px;">
+                        <option value="ALL">All Subjects</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Subject</th>
+                            <th>Class</th>
+                            <th>Status</th>
+                            <th>Recorded By</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentHistoryTableBody">
+                        <tr>
+                            <td colspan="5">Loading recent attendance history...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        const studentPRN = localStorage.getItem("studentPRN");
+        if (!studentPRN) {
+            window.location.href = "index.html";
+        }
+
+        let dashboardDataCache = null;
+
+        function getAuthHeaders() {
+            const headers = {
+                "Content-Type": "application/json",
+                "X-User-Role": "student",
+                "X-Student-Prn": studentPRN || ""
+            };
+            const token = localStorage.getItem("authToken");
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        // Load subjects for dropdowns
+        fetch(`${API_BASE}/subjects`)
+            .then(res => res.json())
+            .then(subjects => {
+                const subjectSelect = document.getElementById("subjectSelect");
+                const historyFilter = document.getElementById("historySubjectFilter");
+                const savedSubj = localStorage.getItem("studentSelectedSubject") || "";
+
+                subjects.forEach(subj => {
+                    const opt1 = document.createElement("option");
+                    opt1.value = subj;
+                    opt1.textContent = subj;
+                    if (subj === savedSubj) opt1.selected = true;
+                    subjectSelect.appendChild(opt1);
+
+                    const opt2 = document.createElement("option");
+                    opt2.value = subj;
+                    opt2.textContent = subj;
+                    historyFilter.appendChild(opt2);
+                });
+            })
+            .catch(err => console.error(err));
+
+        function loadStudentDashboard() {
+            const threshold = Number(document.getElementById("thresholdInput").value) || 75;
+            localStorage.setItem("studentAttendanceThreshold", String(threshold));
+
+            fetch(`${API_BASE}/dashboard/student/${encodeURIComponent(studentPRN)}?threshold=${threshold}`, {
+                headers: getAuthHeaders()
+            })
+            .then(async res => {
+                const data = await res.json();
+                return { ok: res.ok, status: res.status, data };
+            })
+            .then(({ ok, data }) => {
+                if (!ok) {
+                    document.getElementById("message").textContent = data.message || "Could not load student profile.";
+                    const warningBox = document.getElementById("lowAttendanceWarningBox");
+                    warningBox.style.display = "block";
+                    warningBox.className = "alert-box alert-error";
+                    warningBox.textContent = data.message || "Access Denied.";
+                    return;
+                }
+                dashboardDataCache = data;
+                renderDashboard(data);
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById("message").textContent = "Error loading student dashboard.";
+            });
+        }
+
+        function renderDashboard(data) {
+            const st = data.student;
+            const overall = data.overall;
+            const threshold = data.threshold || 75;
+
+            // Update profile fields
+            document.getElementById("welcomeStudentText").textContent = `Welcome, ${st.name}!`;
+            document.getElementById("navStudentBadge").textContent = `${st.name} (PRN: ${st.prn})`;
+            document.getElementById("profileName").textContent = st.name;
+            document.getElementById("profileEmail").textContent = st.email || "Registered Student";
+            document.getElementById("profilePrn").textContent = st.prn;
+            document.getElementById("profileRollNo").textContent = st.rollNo || "-";
+            document.getElementById("profileClass").textContent = st.className;
+            document.getElementById("profileDept").textContent = st.department || "Computer Science";
+
+            // Lock classSelect to the logged-in student's class
+            const classSelect = document.getElementById("classSelect");
+            classSelect.innerHTML = `<option value="${st.className}" selected>${st.className}</option>`;
+            localStorage.setItem("studentSelectedClass", st.className);
+
+            // Overall stats
+            document.getElementById("overallPctValue").textContent = `${overall.percentage.toFixed(2)}%`;
+            document.getElementById("overallTotalSessions").textContent = overall.totalSessions;
+            document.getElementById("overallPresentCount").textContent = overall.presentCount;
+            document.getElementById("overallAbsentCount").textContent = overall.absentCount;
+
+            const rateCard = document.getElementById("overallRateCard");
+            rateCard.className = overall.belowThreshold ? "stat-card stat-red" : "stat-card stat-green";
+            document.getElementById("overallStatusSub").textContent = overall.belowThreshold
+                ? `Below ${threshold}% minimum requirement`
+                : `Meets ${threshold}% minimum requirement`;
+
+            // Low-Attendance Warning Banner
+            const warningBox = document.getElementById("lowAttendanceWarningBox");
+            const lowSubjects = (data.subjectWise || []).filter(s => s.belowThreshold);
+
+            if (overall.belowThreshold || lowSubjects.length > 0) {
+                warningBox.style.display = "block";
+                warningBox.className = "alert-box alert-error";
+                const lowSubjNames = lowSubjects.map(s => `${s.subject} (${s.percentage.toFixed(1)}%)`).join(", ");
+                warningBox.innerHTML = `
+                    <strong>⚠️ Low Attendance Warning (Threshold: ${threshold}%):</strong>
+                    ${overall.belowThreshold
+                        ? `Your overall attendance is <strong>${overall.percentage.toFixed(2)}%</strong> (${overall.presentCount} attended, ${overall.absentCount} missed out of ${overall.totalSessions} classes), which is below the required <strong>${threshold}%</strong> threshold.`
+                        : `Your overall attendance is ${overall.percentage.toFixed(2)}%, but you have subjects below the ${threshold}% requirement.`}
+                    ${lowSubjNames ? `<br><strong>Subjects below ${threshold}%:</strong> ${lowSubjNames}. Please attend upcoming lectures regularly.` : ""}
+                `;
+            } else {
+                warningBox.style.display = "block";
+                warningBox.className = "alert-box alert-success";
+                warningBox.innerHTML = `
+                    <strong>✅ Good Attendance Standing:</strong> Your overall attendance is <strong>${overall.percentage.toFixed(2)}%</strong>, meeting the ${threshold}% threshold across your classes.
+                `;
+            }
+
+            // Subject-wise table
+            const subjTbody = document.getElementById("subjectWiseTableBody");
+            subjTbody.innerHTML = "";
+            (data.subjectWise || []).forEach(subj => {
+                const tr = document.createElement("tr");
+                if (subj.belowThreshold) tr.className = "row-low-attendance";
+
+                const statusBadge = subj.totalSessions === 0
+                    ? `<span class="badge badge-unmarked">No Classes</span>`
+                    : (subj.belowThreshold
+                        ? `<span class="badge badge-warning">Low (&lt;${threshold}%)</span>`
+                        : `<span class="badge badge-good">On Track</span>`);
+
+                tr.innerHTML = `
+                    <td><strong>${subj.subject}</strong></td>
+                    <td>${subj.totalSessions}</td>
+                    <td class="present">${subj.presentCount}</td>
+                    <td class="absent">${subj.absentCount}</td>
+                    <td>
+                        <strong>${subj.percentage.toFixed(2)}%</strong>
+                        <div class="progress-track">
+                            <div class="progress-fill ${subj.belowThreshold ? "low" : ""}" style="width:${Math.min(100, subj.percentage)}%;"></div>
+                        </div>
+                    </td>
+                    <td>${statusBadge}</td>
+                    <td class="no-print">
+                        <button type="button" class="btn-sm btn-outline" onclick="openSubjectAttendance('${subj.subject}')">
+                            View Dates
+                        </button>
+                    </td>
+                `;
+                subjTbody.appendChild(tr);
+            });
+
+            renderRecentHistory();
+        }
+
+        function renderRecentHistory() {
+            if (!dashboardDataCache) return;
+            const filterSubj = document.getElementById("historySubjectFilter").value;
+            const tbody = document.getElementById("recentHistoryTableBody");
+            tbody.innerHTML = "";
+
+            const rows = (dashboardDataCache.recentHistory || []).filter(
+                r => filterSubj === "ALL" || r.subject === filterSubj
+            );
+
+            if (rows.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">No attendance records found for this filter.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            rows.forEach(r => {
+                const isPres = r.status === "present";
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td><strong>${r.date}</strong></td>
+                    <td>${r.subject}</td>
+                    <td>${r.className}</td>
+                    <td class="${isPres ? "present" : "absent"}">
+                        <span class="badge ${isPres ? "badge-present" : "badge-absent"}">
+                            ${isPres ? "Present" : "Absent"}
+                        </span>
+                    </td>
+                    <td><code>${r.facultyId || "faculty1"}</code></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.openSubjectAttendance = function(subject) {
+            localStorage.setItem("studentSelectedSubject", subject);
+            if (dashboardDataCache && dashboardDataCache.student) {
+                localStorage.setItem("studentSelectedClass", dashboardDataCache.student.className);
+            }
+            window.location.href = "student-attendance.html";
+        };
+
+        // Print Summary button
+        document.getElementById("printDashboardBtn").addEventListener("click", function() {
+            window.print();
+        });
+
+        // Threshold input change
+        const savedThreshold = localStorage.getItem("studentAttendanceThreshold");
+        if (savedThreshold) {
+            document.getElementById("thresholdInput").value = savedThreshold;
+        }
+        document.getElementById("thresholdInput").addEventListener("change", loadStudentDashboard);
+
+        // History filter change
+        document.getElementById("historySubjectFilter").addEventListener("change", renderRecentHistory);
+
+        // View Attendance button (Preserves existing #continueButton behavior)
+        document.getElementById("continueButton").addEventListener("click", function() {
+            const selectedClass = document.getElementById("classSelect").value;
+            const selectedSubject = document.getElementById("subjectSelect").value;
+
+            if (selectedClass === "" || selectedSubject === "") {
+                document.getElementById("message").textContent = "Please select both class and subject.";
+                return;
+            }
+
+            localStorage.setItem("studentSelectedClass", selectedClass);
+            localStorage.setItem("studentSelectedSubject", selectedSubject);
+            window.location.href = "student-attendance.html";
+        });
+
+        // Logout button
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            localStorage.removeItem("studentPRN");
+            localStorage.removeItem("studentSelectedClass");
+            localStorage.removeItem("studentSelectedSubject");
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("username");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("authToken");
+            window.location.href = "index.html";
+        });
+
+        loadStudentDashboard();
+    </script>
+
+</body>
+
+</html>

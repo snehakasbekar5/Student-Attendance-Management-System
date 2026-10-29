@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance Report — Student Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar no-print">
+        <div class="nav-brand">
+            <h1>My Subject Attendance &amp; Report</h1>
+            <span>Detailed date-wise attendance records and verified academic standing</span>
+        </div>
+        <div class="nav-links">
+            <a href="student-dashboard.html" class="nav-link">My Dashboard</a>
+            <a href="student-attendance.html" class="nav-link active">Subject-Wise View</a>
+            <span class="nav-user-badge" id="navStudentBadge">Student</span>
+            <button type="button" id="logoutButton" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <div class="report-container">
+
+        <div class="section-header">
+            <div>
+                <p id="studentName" style="margin:0; font-size:18px; color:#12355b; font-weight:700;"></p>
+                <p id="selectedClass" style="margin:4px 0 0 0; font-size:14px; color:#334155;"></p>
+                <p id="selectedSubject" style="margin:2px 0 0 0; font-size:14px; color:#334155;"></p>
+            </div>
+
+            <div class="no-print" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <label for="subjectSwitcher" style="margin:0;">Switch Subject:</label>
+                <select id="subjectSwitcher"></select>
+                <button type="button" id="printStudentReportBtn" class="btn-outline">
+                    🖨️ Print Report
+                </button>
+                <button type="button" id="dashboardButton" class="btn-secondary">
+                    Back to Dashboard
+                </button>
+            </div>
+        </div>
+
+        <div id="subjectWarningBox" class="alert-box" style="display:none;" role="alert" aria-live="polite"></div>
+
+        <!-- Subject Summary Cards -->
+        <div class="grid-stats" style="margin-top:16px;">
+            <div class="stat-card">
+                <div class="stat-label">Total Sessions</div>
+                <div class="stat-value" id="subjTotalSessions">0</div>
+                <div class="stat-sub">Finalized sessions</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Classes Attended</div>
+                <div class="stat-value" id="subjPresentCount">0</div>
+                <div class="stat-sub">Marked Present</div>
+            </div>
+            <div class="stat-card stat-red">
+                <div class="stat-label">Classes Missed</div>
+                <div class="stat-value" id="subjAbsentCount">0</div>
+                <div class="stat-sub">Marked Absent</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Subject Attendance %</div>
+                <div class="stat-value" id="subjPctValue">0.00%</div>
+                <div class="stat-sub">Present / Total × 100</div>
+            </div>
+        </div>
+
+        <h3 id="weeklyAverage" style="color:#12355b;">
+            Subject Attendance Average: Calculating...
+        </h3>
+
+        <hr>
+
+        <h2>Date-wise Attendance Records</h2>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Subject</th>
+                        <th>Class</th>
+                        <th>Status</th>
+                        <th>Marked By</th>
+                    </tr>
+                </thead>
+                <tbody id="attendanceTable">
+                    <tr>
+                        <td colspan="5">Loading attendance records...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <p id="message" role="alert" aria-live="polite"></p>
+
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        const studentPRN = localStorage.getItem("studentPRN");
+        if (!studentPRN) {
+            window.location.href = "index.html";
+        }
+
+        let currentSubject = localStorage.getItem("studentSelectedSubject") || "DSA";
+        let studentCache = null;
+
+        function getAuthHeaders() {
+            const headers = {
+                "Content-Type": "application/json",
+                "X-User-Role": "student",
+                "X-Student-Prn": studentPRN || ""
+            };
+            const token = localStorage.getItem("authToken");
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        // Populate subject switcher
+        fetch(`${API_BASE}/subjects`)
+            .then(res => res.json())
+            .then(subjects => {
+                const switcher = document.getElementById("subjectSwitcher");
+                switcher.innerHTML = `<option value="ALL">All Subjects</option>`;
+                subjects.forEach(subj => {
+                    const opt = document.createElement("option");
+                    opt.value = subj;
+                    opt.textContent = subj;
+                    if (subj === currentSubject) opt.selected = true;
+                    switcher.appendChild(opt);
+                });
+            })
+            .catch(err => console.error(err));
+
+        function loadStudentAttendance() {
+            // Securely load student profile using verified authentication token
+            fetch(`${API_BASE}/students/${encodeURIComponent(studentPRN)}`, {
+                headers: getAuthHeaders()
+            })
+            .then(async response => {
+                const data = await response.json();
+                return { ok: response.ok, status: response.status, data };
+            })
+            .then(({ ok, status, data }) => {
+                if (!ok) {
+                    const warnBox = document.getElementById("subjectWarningBox");
+                    warnBox.style.display = "block";
+                    warnBox.className = "alert-box alert-error";
+                    warnBox.textContent = data.message || "Unauthorized: You can only view your own attendance records.";
+                    document.getElementById("message").textContent = data.message || "Access Denied.";
+                    return;
+                }
+                studentCache = data;
+                renderSubjectAttendance();
+            })
+            .catch(error => {
+                console.error(error);
+                document.getElementById("message").textContent = "Error loading attendance records.";
+            });
+        }
+
+        function renderSubjectAttendance() {
+            if (!studentCache) return;
+
+            const student = studentCache;
+            const threshold = Number(localStorage.getItem("studentAttendanceThreshold")) || 75;
+
+            document.getElementById("navStudentBadge").textContent =
+                `${student.name} (PRN: ${student.prn})`;
+            document.getElementById("studentName").textContent =
+                `Student: ${student.name} (PRN: ${student.prn} | Roll No: ${student.rollNo || "-"})`;
+            document.getElementById("selectedClass").textContent =
+                "Class: " + student.className;
+            document.getElementById("selectedSubject").textContent =
+                "Subject: " + (currentSubject === "ALL" ? "All Subjects" : currentSubject);
+
+            const allRecords = (student.attendanceRecords || []).filter(
+                r => r.status === "present" || r.status === "absent"
+            );
+
+            const subjectRecords = currentSubject === "ALL"
+                ? [...allRecords]
+                : allRecords.filter(r => r.subject === currentSubject);
+
+            subjectRecords.sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+
+            const presentCount = subjectRecords.filter(r => r.status === "present").length;
+            const absentCount = subjectRecords.filter(r => r.status === "absent").length;
+            const totalClasses = presentCount + absentCount;
+            const average = totalClasses > 0 ? (presentCount / totalClasses) * 100 : 0;
+
+            document.getElementById("subjTotalSessions").textContent = totalClasses;
+            document.getElementById("subjPresentCount").textContent = presentCount;
+            document.getElementById("subjAbsentCount").textContent = absentCount;
+            document.getElementById("subjPctValue").textContent = `${average.toFixed(2)}%`;
+
+            document.getElementById("weeklyAverage").textContent =
+                `Attendance Percentage (${currentSubject === "ALL" ? "All Subjects" : currentSubject}): ${average.toFixed(2)}% (${presentCount} Present / ${totalClasses} Finalized Sessions)`;
+
+            const warnBox = document.getElementById("subjectWarningBox");
+            if (totalClasses > 0 && average < threshold) {
+                warnBox.style.display = "block";
+                warnBox.className = "alert-box alert-error";
+                warnBox.innerHTML =
+                    `<strong>⚠️ Low Attendance Warning:</strong> Your attendance in <strong>${currentSubject === "ALL" ? "All Subjects" : currentSubject}</strong> is <strong>${average.toFixed(2)}%</strong>, which is below the ${threshold}% threshold.`;
+            } else if (totalClasses > 0) {
+                warnBox.style.display = "block";
+                warnBox.className = "alert-box alert-success";
+                warnBox.innerHTML =
+                    `<strong>✅ Good Standing:</strong> Your attendance in <strong>${currentSubject === "ALL" ? "All Subjects" : currentSubject}</strong> is <strong>${average.toFixed(2)}%</strong> (meets ${threshold}% target).`;
+            } else {
+                warnBox.style.display = "none";
+            }
+
+            const table = document.getElementById("attendanceTable");
+            table.innerHTML = "";
+
+            if (subjectRecords.length === 0) {
+                table.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">No attendance records found for this subject.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            subjectRecords.forEach(record => {
+                const isPres = record.status === "present";
+                const row = document.createElement("tr");
+                row.innerHTML = `
+                    <td><strong>${record.date}</strong></td>
+                    <td>${record.subject}</td>
+                    <td>${record.className || student.className}</td>
+                    <td class="${isPres ? "present" : "absent"}">
+                        <span class="badge ${isPres ? "badge-present" : "badge-absent"}">
+                            ${isPres ? "present" : "absent"}
+                        </span>
+                    </td>
+                    <td><code>${record.facultyId || "faculty1"}</code></td>
+                `;
+                table.appendChild(row);
+            });
+        }
+
+        document.getElementById("subjectSwitcher").addEventListener("change", function() {
+            currentSubject = this.value;
+            localStorage.setItem("studentSelectedSubject", currentSubject);
+            renderSubjectAttendance();
+        });
+
+        // Print Report button
+        document.getElementById("printStudentReportBtn").addEventListener("click", function() {
+            window.print();
+        });
+
+        document.getElementById("dashboardButton").addEventListener("click", function() {
+            window.location.href = "student-dashboard.html";
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            localStorage.removeItem("studentPRN");
+            localStorage.removeItem("studentSelectedClass");
+            localStorage.removeItem("studentSelectedSubject");
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("username");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("authToken");
+            window.location.href = "index.html";
+        });
+
+        loadStudentAttendance();
+    </script>
+
+</body>
+
+</html>

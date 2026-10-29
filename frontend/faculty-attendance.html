@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mark Attendance — Faculty Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- Top Navigation Bar -->
+    <div class="top-navbar">
+        <div class="nav-brand">
+            <h1>Live Attendance Marking</h1>
+            <span>Select class, subject, and date to record or review student attendance</span>
+        </div>
+        <div class="nav-links">
+            <a href="faculty-dashboard.html" class="nav-link">Dashboard</a>
+            <a href="faculty-dashboard.html#studentManagementSection" class="nav-link">Manage Students</a>
+            <a href="faculty-attendance.html" class="nav-link active">Mark Attendance</a>
+            <a href="faculty-report.html" class="nav-link">Reports &amp; History</a>
+            <span class="nav-user-badge" id="navUserBadge">Faculty</span>
+            <button type="button" id="logoutButton" class="btn-danger btn-sm">Logout</button>
+        </div>
+    </div>
+
+    <div class="attendance-container">
+
+        <!-- Session Selection Controls -->
+        <div class="section-header">
+            <div>
+                <h2 style="margin:0;">Session Configuration</h2>
+                <p id="selectedClass" style="margin:4px 0 0 0; font-size:14px; color:#12355b; font-weight:600;"></p>
+                <p id="selectedSubject" style="margin:2px 0 0 0; font-size:14px; color:#12355b; font-weight:600;"></p>
+            </div>
+        </div>
+
+        <div class="filter-bar">
+            <div class="form-group">
+                <label for="classSelect">Class</label>
+                <select id="classSelect"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="subjectSelect">Subject</label>
+                <select id="subjectSelect"></select>
+            </div>
+
+            <div class="form-group">
+                <label for="dateSelect">Attendance Date (Local Time)</label>
+                <input type="date" id="dateSelect">
+            </div>
+
+            <div class="form-group">
+                <label for="quickDateSelect">Jump to Saved Session Date</label>
+                <select id="quickDateSelect">
+                    <option value="">-- Select Date Preset --</option>
+                </select>
+            </div>
+
+            <div class="form-group" style="flex:0 0 auto;">
+                <button type="button" id="loadStudentsBtn">
+                    Load Session
+                </button>
+            </div>
+        </div>
+
+        <!-- Session Mode / Duplicate Prevention Banner -->
+        <div id="sessionStatusBanner" class="alert-box alert-info" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+            <div id="sessionStatusText">Loading session status...</div>
+            <div style="display:flex; gap:8px;">
+                <button type="button" id="editSessionBtn" class="btn-warning btn-sm" style="display:none;">
+                    Edit Saved Attendance
+                </button>
+                <button type="button" id="cancelEditSessionBtn" class="btn-secondary btn-sm" style="display:none;">
+                    Cancel Edit
+                </button>
+            </div>
+        </div>
+
+        <!-- Live Counters Bar -->
+        <div class="grid-stats" style="margin-top:16px; margin-bottom:18px;">
+            <div class="stat-card">
+                <div class="stat-label">Total Students</div>
+                <div class="stat-value" id="countTotal">0</div>
+                <div class="stat-sub">Registered in class</div>
+            </div>
+            <div class="stat-card stat-green">
+                <div class="stat-label">Present</div>
+                <div class="stat-value" id="countPresent">0</div>
+                <div class="stat-sub">Marked Present</div>
+            </div>
+            <div class="stat-card stat-red">
+                <div class="stat-label">Absent</div>
+                <div class="stat-value" id="countAbsent">0</div>
+                <div class="stat-sub">Marked Absent</div>
+            </div>
+            <div class="stat-card stat-amber">
+                <div class="stat-label">Unmarked</div>
+                <div class="stat-value" id="countUnmarked">0</div>
+                <div class="stat-sub">Awaiting selection</div>
+            </div>
+        </div>
+
+        <!-- Bulk Actions & Student Search -->
+        <div class="action-bar" style="justify-content:space-between; background:#f8fafc; padding:12px 16px; border-radius:8px; border:1px solid #e2e8f0;">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+                <strong style="font-size:14px; color:#12355b;">Bulk Actions:</strong>
+                <button type="button" id="markAllPresentBtn" class="btn-success btn-sm">
+                    ✓ Mark All Present
+                </button>
+                <button type="button" id="markAllAbsentBtn" class="btn-danger btn-sm">
+                    ✕ Mark All Absent
+                </button>
+                <button type="button" id="clearMarksBtn" class="btn-outline btn-sm">
+                    Reset to Unmarked
+                </button>
+            </div>
+
+            <div style="min-width:240px;">
+                <input
+                    type="text"
+                    id="attendanceSearchInput"
+                    placeholder="Filter students by name, PRN, or roll no..."
+                    style="width:100%; padding:7px 10px; font-size:13px;"
+                >
+            </div>
+        </div>
+
+        <!-- Student Attendance Table -->
+        <h2>Student Attendance Roster</h2>
+
+        <div id="studentList">
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Roll No</th>
+                            <th>Student ID (PRN)</th>
+                            <th>Student Name</th>
+                            <th>Current Status</th>
+                            <th>Mark Attendance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr>
+                            <td colspan="5">Loading students...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Notification Message -->
+        <div id="attendanceAlertBox" style="display:none;" role="alert" aria-live="polite"></div>
+        <p id="message" role="alert" aria-live="polite"></p>
+
+        <!-- Submit & Navigation Actions -->
+        <div class="action-bar" style="margin-top:20px; justify-content:space-between;">
+            <button type="button" id="saveButton" class="btn-success" style="min-width:240px;">
+                Submit Attendance
+            </button>
+
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button type="button" id="dashboardButton" class="btn-secondary">
+                    Back to Dashboard
+                </button>
+                <button type="button" id="reportButton">
+                    View Report
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:3000";
+
+        // Prevent logged-in students from accessing faculty attendance page
+        if (localStorage.getItem("userRole") === "student") {
+            window.location.href = "student-dashboard.html";
+        }
+
+        document.getElementById("navUserBadge").textContent =
+            `Faculty: ${localStorage.getItem("username") || "faculty1"}`;
+
+        // Get today's date in local timezone (YYYY-MM-DD)
+        function getLocalTodayISO() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, "0");
+            const day = String(now.getDate()).padStart(2, "0");
+            return `${year}-${month}-${day}`;
+        }
+
+        function getAuthHeaders() {
+            const headers = {
+                "Content-Type": "application/json",
+                "X-User-Role": localStorage.getItem("userRole") || "faculty",
+                "X-Username": localStorage.getItem("username") || "faculty1",
+                "X-Faculty-Id": localStorage.getItem("facultyId") || "faculty1"
+            };
+            const token = localStorage.getItem("authToken");
+            if (token) {
+                headers["Authorization"] = `Bearer ${token}`;
+            }
+            return headers;
+        }
+
+        let currentStudents = [];
+        let currentMarks = {}; // prn -> "" | "present" | "absent"
+        let savedMarksSnapshot = {}; // snapshot of saved marks when session alreadySubmitted
+        let isAlreadySubmitted = false;
+        let isEditMode = false;
+
+        function showFeedback(text, type = "error") {
+            const msgEl = document.getElementById("message");
+            const alertBox = document.getElementById("attendanceAlertBox");
+
+            msgEl.textContent = text;
+            msgEl.className = type === "success" ? "success" : "";
+
+            if (text) {
+                alertBox.style.display = "block";
+                alertBox.className = `alert-box ${
+                    type === "success" ? "alert-success" : (type === "warning" ? "alert-warning" : "alert-error")
+                }`;
+                alertBox.textContent = text;
+            } else {
+                alertBox.style.display = "none";
+                alertBox.textContent = "";
+            }
+        }
+
+        function updateHeaderLabels() {
+            const cls = document.getElementById("classSelect").value;
+            const subj = document.getElementById("subjectSelect").value;
+            document.getElementById("selectedClass").textContent = "Class: " + cls;
+            document.getElementById("selectedSubject").textContent = "Subject: " + subj;
+            if (cls) localStorage.setItem("selectedClass", cls);
+            if (subj) localStorage.setItem("selectedSubject", subj);
+        }
+
+        function populateQuickDates() {
+            const today = getLocalTodayISO();
+            const quickSelect = document.getElementById("quickDateSelect");
+            quickSelect.innerHTML = `<option value="">-- Jump to Date --</option>`;
+
+            const presetDates = [
+                { date: today, label: `${today} (Today — Unmarked)` },
+                { date: "2026-10-12", label: "2026-10-12 (Saved C++ Session)" },
+                { date: "2026-10-09", label: "2026-10-09 (Saved Java Session)" },
+                { date: "2026-10-08", label: "2026-10-08 (Saved Python Session)" },
+                { date: "2026-10-07", label: "2026-10-07 (Saved C Session)" },
+                { date: "2026-10-06", label: "2026-10-06 (Saved DSA Session)" },
+                { date: "2026-10-05", label: "2026-10-05 (Saved Maths Session)" }
+            ];
+
+            presetDates.forEach(item => {
+                const opt = document.createElement("option");
+                opt.value = item.date;
+                opt.textContent = item.label;
+                quickSelect.appendChild(opt);
+            });
+        }
+
+        async function initSelectors() {
+            const today = getLocalTodayISO();
+            const dateInput = document.getElementById("dateSelect");
+            dateInput.value = localStorage.getItem("selectedAttendanceDate") || today;
+            localStorage.removeItem("selectedAttendanceDate");
+
+            populateQuickDates();
+
+            const [classesRes, subjectsRes] = await Promise.all([
+                fetch(`${API_BASE}/classes`).then(r => r.json()),
+                fetch(`${API_BASE}/subjects`).then(r => r.json())
+            ]);
+
+            const classSelect = document.getElementById("classSelect");
+            const savedClass = localStorage.getItem("selectedClass") || classesRes[0] || "CSE-(I)SE DS";
+            classSelect.innerHTML = "";
+            classesRes.forEach(cls => {
+                const opt = document.createElement("option");
+                opt.value = cls;
+                opt.textContent = cls;
+                if (cls === savedClass) opt.selected = true;
+                classSelect.appendChild(opt);
+            });
+
+            const subjectSelect = document.getElementById("subjectSelect");
+            const savedSubj = localStorage.getItem("selectedSubject") || subjectsRes[0] || "DSA";
+            subjectSelect.innerHTML = "";
+            subjectsRes.forEach(subj => {
+                const opt = document.createElement("option");
+                opt.value = subj;
+                opt.textContent = subj;
+                if (subj === savedSubj) opt.selected = true;
+                subjectSelect.appendChild(opt);
+            });
+
+            updateHeaderLabels();
+            loadStudents();
+        }
+
+        function updateLiveCounts() {
+            let present = 0;
+            let absent = 0;
+            let unmarked = 0;
+
+            currentStudents.forEach(s => {
+                const st = currentMarks[s.prn] || "";
+                if (st === "present") present++;
+                else if (st === "absent") absent++;
+                else unmarked++;
+            });
+
+            document.getElementById("countTotal").textContent = currentStudents.length;
+            document.getElementById("countPresent").textContent = present;
+            document.getElementById("countAbsent").textContent = absent;
+            document.getElementById("countUnmarked").textContent = unmarked;
+        }
+
+        function updateSessionBannerAndControls() {
+            const banner = document.getElementById("sessionStatusBanner");
+            const bannerText = document.getElementById("sessionStatusText");
+            const editBtn = document.getElementById("editSessionBtn");
+            const cancelEditBtn = document.getElementById("cancelEditSessionBtn");
+            const saveBtn = document.getElementById("saveButton");
+            const markAllPresentBtn = document.getElementById("markAllPresentBtn");
+            const markAllAbsentBtn = document.getElementById("markAllAbsentBtn");
+            const clearMarksBtn = document.getElementById("clearMarksBtn");
+
+            const cls = document.getElementById("classSelect").value;
+            const subj = document.getElementById("subjectSelect").value;
+            const dt = document.getElementById("dateSelect").value;
+
+            const controlsLocked = isAlreadySubmitted && !isEditMode;
+
+            markAllPresentBtn.disabled = controlsLocked || currentStudents.length === 0;
+            markAllAbsentBtn.disabled = controlsLocked || currentStudents.length === 0;
+            clearMarksBtn.disabled = controlsLocked || isAlreadySubmitted || currentStudents.length === 0;
+
+            if (currentStudents.length === 0) {
+                banner.className = "alert-box alert-warning";
+                bannerText.textContent = `No students found registered in ${cls}. Add students in Manage Students first.`;
+                editBtn.style.display = "none";
+                cancelEditBtn.style.display = "none";
+                saveBtn.disabled = true;
+                return;
+            }
+
+            if (isAlreadySubmitted && !isEditMode) {
+                banner.className = "alert-box alert-warning";
+                bannerText.innerHTML =
+                    `<strong>Saved Attendance Found (${dt} • ${cls} • ${subj}):</strong> Attendance for this session has already been submitted. Viewing saved records in read-only mode to prevent duplicate sessions. Click <strong>"Edit Saved Attendance"</strong> to modify.`;
+                editBtn.style.display = "inline-flex";
+                cancelEditBtn.style.display = "none";
+                saveBtn.disabled = true;
+                saveBtn.textContent = "Attendance Already Submitted";
+            } else if (isAlreadySubmitted && isEditMode) {
+                banner.className = "alert-box alert-info";
+                bannerText.innerHTML =
+                    `<strong>Edit Mode Active (${dt} • ${cls} • ${subj}):</strong> You are editing previously submitted attendance. Modify statuses below and click <strong>"Update Saved Attendance"</strong>.`;
+                editBtn.style.display = "none";
+                cancelEditBtn.style.display = "inline-flex";
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Update Saved Attendance";
+            } else {
+                banner.className = "alert-box alert-info";
+                bannerText.innerHTML =
+                    `<strong>New Attendance Session (${dt} • ${cls} • ${subj}):</strong> All students start as <strong>Unmarked</strong>. Mark every student Present or Absent before submitting.`;
+                editBtn.style.display = "none";
+                cancelEditBtn.style.display = "none";
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Submit Attendance";
+            }
+        }
+
+        function renderAttendanceTable() {
+            const tbody = document.getElementById("attendanceTableBody");
+            const searchQ = document.getElementById("attendanceSearchInput").value.trim().toLowerCase();
+            const controlsLocked = isAlreadySubmitted && !isEditMode;
+
+            if (currentStudents.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">No students registered in this class.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            const filtered = currentStudents.filter(s => {
+                if (!searchQ) return true;
+                return (
+                    (s.name || "").toLowerCase().includes(searchQ) ||
+                    (s.prn || "").toLowerCase().includes(searchQ) ||
+                    (s.rollNo || "").toLowerCase().includes(searchQ)
+                );
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5">
+                            <div class="empty-state">No students in this class match your search filter.</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = "";
+
+            filtered.forEach(student => {
+                const status = currentMarks[student.prn] || "";
+                const tr = document.createElement("tr");
+                if (!status) {
+                    tr.className = "row-unmarked";
+                }
+
+                let badgeHtml = `<span class="badge badge-unmarked" id="badge-${student.prn}">Unmarked</span>`;
+                if (status === "present") {
+                    badgeHtml = `<span class="badge badge-present" id="badge-${student.prn}">Present</span>`;
+                } else if (status === "absent") {
+                    badgeHtml = `<span class="badge badge-absent" id="badge-${student.prn}">Absent</span>`;
+                }
+
+                tr.innerHTML = `
+                    <td><strong>${student.rollNo || "-"}</strong></td>
+                    <td><code>${student.prn}</code></td>
+                    <td><strong>${student.name}</strong></td>
+                    <td>${badgeHtml}</td>
+                    <td>
+                        <div class="status-controls">
+                            <button
+                                type="button"
+                                class="status-btn ${status === "present" ? "active-present" : ""}"
+                                onclick="setStudentMark('${student.prn}', 'present')"
+                                ${controlsLocked ? "disabled" : ""}
+                                aria-label="Mark ${student.name} Present"
+                            >
+                                Present
+                            </button>
+                            <button
+                                type="button"
+                                class="status-btn ${status === "absent" ? "active-absent" : ""}"
+                                onclick="setStudentMark('${student.prn}', 'absent')"
+                                ${controlsLocked ? "disabled" : ""}
+                                aria-label="Mark ${student.name} Absent"
+                            >
+                                Absent
+                            </button>
+                            <select
+                                id="status-${student.prn}"
+                                class="status-select"
+                                onchange="setStudentMark('${student.prn}', this.value)"
+                                ${controlsLocked ? "disabled" : ""}
+                                aria-label="Attendance status for ${student.name}"
+                            >
+                                <option value="" ${status === "" ? "selected" : ""}>-- Unmarked --</option>
+                                <option value="present" ${status === "present" ? "selected" : ""}>Present</option>
+                                <option value="absent" ${status === "absent" ? "selected" : ""}>Absent</option>
+                            </select>
+                        </div>
+                    </td>
+                `;
+
+                tbody.appendChild(tr);
+            });
+        }
+
+        window.setStudentMark = function(prn, status) {
+            if (isAlreadySubmitted && !isEditMode) return;
+            currentMarks[prn] = status;
+            updateLiveCounts();
+            renderAttendanceTable();
+        };
+
+        function loadStudents() {
+            updateHeaderLabels();
+            showFeedback("", "info");
+
+            const selectedClass = document.getElementById("classSelect").value;
+            const selectedSubject = document.getElementById("subjectSelect").value;
+            const selectedDate = document.getElementById("dateSelect").value;
+
+            if (!selectedClass || !selectedSubject || !selectedDate) {
+                return;
+            }
+
+            fetch(
+                `${API_BASE}/attendance?className=${encodeURIComponent(selectedClass)}&subject=${encodeURIComponent(selectedSubject)}&date=${encodeURIComponent(selectedDate)}`
+            )
+            .then(res => res.json())
+            .then(data => {
+                currentStudents = data.students || [];
+                isAlreadySubmitted = Boolean(data.alreadySubmitted);
+                isEditMode = false;
+                currentMarks = {};
+                savedMarksSnapshot = {};
+
+                currentStudents.forEach(s => {
+                    // IMPORTANT: Do NOT mark Present by default when session is new!
+                    const initialStatus = isAlreadySubmitted && (s.status === "present" || s.status === "absent")
+                        ? s.status
+                        : "";
+                    currentMarks[s.prn] = initialStatus;
+                    savedMarksSnapshot[s.prn] = initialStatus;
+                });
+
+                updateLiveCounts();
+                updateSessionBannerAndControls();
+                renderAttendanceTable();
+            })
+            .catch(err => {
+                console.error(err);
+                showFeedback("Error loading attendance session from backend.", "error");
+            });
+        }
+
+        // Bulk action handlers
+        document.getElementById("markAllPresentBtn").addEventListener("click", function() {
+            if (isAlreadySubmitted && !isEditMode) return;
+            currentStudents.forEach(s => {
+                currentMarks[s.prn] = "present";
+            });
+            updateLiveCounts();
+            renderAttendanceTable();
+        });
+
+        document.getElementById("markAllAbsentBtn").addEventListener("click", function() {
+            if (isAlreadySubmitted && !isEditMode) return;
+            currentStudents.forEach(s => {
+                currentMarks[s.prn] = "absent";
+            });
+            updateLiveCounts();
+            renderAttendanceTable();
+        });
+
+        document.getElementById("clearMarksBtn").addEventListener("click", function() {
+            if (isAlreadySubmitted) return;
+            currentStudents.forEach(s => {
+                currentMarks[s.prn] = "";
+            });
+            updateLiveCounts();
+            renderAttendanceTable();
+        });
+
+        // Edit mode toggle for already-submitted sessions
+        document.getElementById("editSessionBtn").addEventListener("click", function() {
+            isEditMode = true;
+            showFeedback("", "info");
+            updateSessionBannerAndControls();
+            renderAttendanceTable();
+        });
+
+        document.getElementById("cancelEditSessionBtn").addEventListener("click", function() {
+            isEditMode = false;
+            currentStudents.forEach(s => {
+                currentMarks[s.prn] = savedMarksSnapshot[s.prn] || "";
+            });
+            showFeedback("", "info");
+            updateLiveCounts();
+            updateSessionBannerAndControls();
+            renderAttendanceTable();
+        });
+
+        // Search filter inside roster
+        document.getElementById("attendanceSearchInput").addEventListener("input", renderAttendanceTable);
+
+        // Selector changes
+        document.getElementById("classSelect").addEventListener("change", loadStudents);
+        document.getElementById("subjectSelect").addEventListener("change", loadStudents);
+        document.getElementById("dateSelect").addEventListener("change", loadStudents);
+        document.getElementById("loadStudentsBtn").addEventListener("click", loadStudents);
+
+        document.getElementById("quickDateSelect").addEventListener("change", function() {
+            if (this.value) {
+                document.getElementById("dateSelect").value = this.value;
+                loadStudents();
+            }
+        });
+
+        // Submit / Update Attendance
+        document.getElementById("saveButton").addEventListener("click", function() {
+            if (isAlreadySubmitted && !isEditMode) {
+                showFeedback(
+                    "Attendance for this session has already been submitted. Click 'Edit Saved Attendance' first if you wish to modify it.",
+                    "warning"
+                );
+                return;
+            }
+
+            const selectedClass = document.getElementById("classSelect").value;
+            const selectedSubject = document.getElementById("subjectSelect").value;
+            const selectedDate = document.getElementById("dateSelect").value;
+
+            if (!selectedClass || !selectedSubject || !selectedDate) {
+                showFeedback("Please select class, subject, and date.", "error");
+                return;
+            }
+
+            // Require an explicit status for every student in the class
+            const unmarkedList = currentStudents.filter(
+                s => currentMarks[s.prn] !== "present" && currentMarks[s.prn] !== "absent"
+            );
+
+            if (unmarkedList.length > 0) {
+                showFeedback(
+                    `Cannot submit yet: ${unmarkedList.length} student(s) are still Unmarked. Please mark every student as Present or Absent before submitting.`,
+                    "error"
+                );
+                return;
+            }
+
+            const records = currentStudents.map(s => ({
+                prn: s.prn,
+                studentId: s.prn,
+                status: currentMarks[s.prn]
+            }));
+
+            const method = (isAlreadySubmitted && isEditMode) ? "PUT" : "POST";
+
+            fetch(`${API_BASE}/attendance`, {
+                method,
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    date: selectedDate,
+                    className: selectedClass,
+                    subject: selectedSubject,
+                    facultyId: localStorage.getItem("facultyId") || localStorage.getItem("username") || "faculty1",
+                    allowUpdate: Boolean(isAlreadySubmitted && isEditMode),
+                    records
+                })
+            })
+            .then(async res => {
+                const data = await res.json();
+                return { ok: res.ok, status: res.status, data };
+            })
+            .then(({ ok, data }) => {
+                if (!ok) {
+                    showFeedback(data.message || "Error saving attendance.", "error");
+                    return;
+                }
+                const savedMsg = data.message || "Attendance saved successfully!";
+                loadStudents();
+                setTimeout(() => {
+                    showFeedback(savedMsg, "success");
+                }, 80);
+            })
+            .catch(err => {
+                console.error(err);
+                showFeedback("Network error while saving attendance.", "error");
+            });
+        });
+
+        // Navigation buttons
+        document.getElementById("dashboardButton").addEventListener("click", function() {
+            window.location.href = "faculty-dashboard.html";
+        });
+
+        document.getElementById("reportButton").addEventListener("click", function() {
+            updateHeaderLabels();
+            window.location.href = "faculty-report.html";
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", function() {
+            localStorage.removeItem("userRole");
+            localStorage.removeItem("username");
+            localStorage.removeItem("userName");
+            localStorage.removeItem("authToken");
+            localStorage.removeItem("facultyId");
+            window.location.href = "index.html";
+        });
+
+        // Initialize page
+        initSelectors();
+    </script>
+
+</body>
+
+</html>
